@@ -43,9 +43,6 @@ public class UserController {
     @PutMapping
     public User patchUser(@Valid @RequestBody User user) throws ValidationUserExeption {
         if (isValid(user) && users.containsKey(user.getId())) {
-            if (user.getName().equals("") || user.getName() == null) {
-
-            }
             users.replace(user.getId(), user);
             return user;
         } else {
