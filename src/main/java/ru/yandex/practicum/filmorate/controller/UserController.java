@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.model.User;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,48 +20,33 @@ public class UserController {
     private int counterUserId = 1;
 
     @GetMapping
-    public ArrayList<User> findAllUsers() {
+    public List<User> findAllUsers() {
         log.debug("Обработка запроса GET /users; Текущее количество пользователей: {}", users.size());
         return new ArrayList<>(users.values());
-   }
+    }
 
     @PostMapping
     public User createUser(@Valid @RequestBody User user) throws ValidationUserExeption {
-        if (isValid(user)) {
-            if (user.getName().equals("") || user.getName() == null) {
-                user.setName(user.getLogin());
-            }
-            user.setId(counterUserId);
-            users.put(counterUserId, user);
-            counterUserId++;
-            return user;
-        } else {
-            log.debug("Пользователь не прошел валидацию.");
-            return null;
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
         }
+        user.setId(counterUserId);
+        users.put(counterUserId, user);
+        counterUserId++;
+        return user;
     }
 
     @PutMapping
     public User patchUser(@Valid @RequestBody User user) throws ValidationUserExeption {
-        if (isValid(user) && users.containsKey(user.getId())) {
+        if (users.containsKey(user.getId())) {
+            if (user.getName() == null || user.getName().isBlank()) {
+                user.setName(user.getLogin());
+            }
             users.replace(user.getId(), user);
             return user;
         } else {
-            log.debug("Пользователь не прошел валидацию.");
-            throw new ValidationUserExeption("Пользователь не прошел валидацию.");
+            log.debug("Пользователь не найден!");
+            throw new ValidationUserExeption("Пользователь не найден!");
         }
-    }
-
-    public boolean isValid(User user) throws ValidationUserExeption {
-        if (user.getLogin().contains(" ")) {
-            log.debug("ValidationUserExeption: логин не может содержать пробелы.");
-            throw new ValidationUserExeption("Логин не может содержать пробелы.");
-        } else if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
-            return true;
-        } else {
-            return true;
-        }
-
     }
 }

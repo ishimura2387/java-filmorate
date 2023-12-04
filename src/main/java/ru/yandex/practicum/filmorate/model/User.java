@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import ru.yandex.practicum.filmorate.annotation.CheckSpace;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -16,6 +17,7 @@ public class User {
     @Email
     private String email; // электронная почта
     @NotBlank
+    @CheckSpace
     private String login; // логин пользователя
     private String name; // имя для отображения
     @Past
