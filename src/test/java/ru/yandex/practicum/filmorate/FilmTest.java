@@ -40,4 +40,43 @@ public class FilmTest {
         violations = validator.validate(film3);
         assertEquals(violations.size(), 1);
     }
+
+    @Test
+    public void filmDescriptionTest() {
+        Film film1 = new Film(1, "Терминатор", "", LocalDate.of(1990, 12, 20), 120);
+        Film film2 = new Film(2, "Терминатор 2", null, LocalDate.of(1990, 12, 20), 120);
+        Film film3 = new Film(3, "Терминатор 3", "Про роботов Про роботов Про роботов Про роботов " +
+                "Про роботов Про роботов Про роботов Про роботов Про роботов Про роботов Про роботов Про роботов Про роботов" +
+                "Про роботов Про роботов Про роботов Про роботов Про роботов Про роботов Про роботов", LocalDate.of(1990, 12, 20), 120);
+        Set<ConstraintViolation<Film>> violations = validator.validate(film2);
+        assertEquals(violations.size(), 1);
+        violations = validator.validate(film1);
+        assertEquals(violations.size(), 0);
+        violations = validator.validate(film3);
+        assertEquals(violations.size(), 1);
+    }
+
+    @Test
+    public void filmDateTest() {
+        Film film1 = new Film(1, "Терминатор", "Про роботов", LocalDate.of(1690, 12, 20), 120);
+        Film film2 = new Film(2, "Терминатор 2", "Про роботов", LocalDate.of(1990, 12, 20), 120);
+        Set<ConstraintViolation<Film>> violations = validator.validate(film2);
+        assertEquals(violations.size(), 0);
+        violations = validator.validate(film1);
+        assertEquals(violations.size(), 1);
+    }
+
+    @Test
+    public void filmDurationTest() {
+        Film film1 = new Film(1, "Терминатор", "Про роботов", LocalDate.of(1990, 12, 20), 0);
+        Film film2 = new Film(2, "Терминатор 2", "Про роботов", LocalDate.of(1990, 12, 20), 120);
+        Film film3 = new Film(3, "Терминатор 3", "Про роботов", LocalDate.of(1990, 12, 20), -2);
+        Set<ConstraintViolation<Film>> violations = validator.validate(film2);
+        assertEquals(violations.size(), 0);
+        violations = validator.validate(film1);
+        assertEquals(violations.size(), 1);
+        violations = validator.validate(film3);
+        assertEquals(violations.size(), 1);
+    }
+
 }

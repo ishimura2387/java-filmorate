@@ -39,19 +39,6 @@ public class UserTest {
     }
 
     @Test
-    public void userLoginTest() {
-        User user1 = new User(1, "user1@yandex.ru", "user1", "Петя", LocalDate.of(2000, 5, 11));
-        User user2 = new User(2, "user2@yandex.ru", "", "Вася", LocalDate.of(2000, 6, 12));
-        User user3 = new User(3, "user3@yandex.ru", null, "Шахоб", LocalDate.of(1997, 2, 20));
-        Set<ConstraintViolation<User>> violations = validator.validate(user2);
-        assertEquals(violations.size(), 1);
-        violations = validator.validate(user1);
-        assertEquals(violations.size(), 0);
-        violations = validator.validate(user3);
-        assertEquals(violations.size(), 1);
-    }
-
-    @Test
     public void userDateBirthdayTest() {
         User user1 = new User(1, "user1@yandex.ru", "user1", "Петя", LocalDate.of(2024, 5, 11));
         User user2 = new User(2, "user2@yandex.ru", "user2", "Вася", LocalDate.of(2000, 6, 12));
@@ -59,6 +46,19 @@ public class UserTest {
         assertEquals(violations.size(), 1);
         violations = validator.validate(user2);
         assertEquals(violations.size(), 0);
+    }
+
+    @Test
+    public void userLoginTest() {
+        User user1 = new User(1, "user1@yandex.ru", null, "Петя", LocalDate.of(2021, 5, 11));
+        User user2 = new User(2, "user2@yandex.ru", "user2", "Вася", LocalDate.of(2000, 6, 12));
+        User user3 = new User(3, "user1@yandex.ru", "user 1", "Петя", LocalDate.of(2021, 5, 11));
+        Set<ConstraintViolation<User>> violations = validator.validate(user1);
+        assertEquals(violations.size(), 2);
+        violations = validator.validate(user2);
+        assertEquals(violations.size(), 0);
+        violations = validator.validate(user3);
+        assertEquals(violations.size(), 1);
     }
 
 }
