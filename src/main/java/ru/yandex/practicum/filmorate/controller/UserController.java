@@ -37,14 +37,14 @@ public class UserController {
     }
 
     @PutMapping
-    public User patchUser(@Valid @RequestBody User user) throws ValidationUserExeption {
+    public User patchUser(@Valid @RequestBody User user) {
         if (users.containsKey(user.getId())) {
             if (user.getName() == null || user.getName().isBlank()) {
                 user.setName(user.getLogin());
             }
             users.replace(user.getId(), user);
             return user;
-        } else {
+        } else { // в этом и суть. Если пытаются обновить пользователя которого нет? нам нужно вернуть ошибку
             log.debug("Пользователь не найден!");
             throw new ValidationUserExeption("Пользователь не найден!");
         }

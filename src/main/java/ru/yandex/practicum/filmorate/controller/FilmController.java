@@ -37,12 +37,12 @@ public class FilmController {
 
 
     @PutMapping()
-    public Film patchFilm(@Valid @RequestBody Film film) throws ValidationFilmExeption {
+    public Film patchFilm(@Valid @RequestBody Film film) {
         if (films.containsKey(film.getId())) {
             films.replace(film.getId(), film);
             log.debug("Изменен фильм: {}", film);
             return film;
-        } else {
+        } else { // в этом и суть. Если пытаются обновить фильм которого нет? нам нужно вернуть ошибку
             log.debug("Фильм не найден!");
             throw new ValidationFilmExeption("Фильм не найден!");
         }
