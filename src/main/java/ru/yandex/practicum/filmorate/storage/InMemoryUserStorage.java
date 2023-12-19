@@ -48,5 +48,4 @@ public class InMemoryUserStorage implements UserStorage {
     public List<Integer> findAllUsersId() {
         return new ArrayList<>(users.keySet());
     }
-    
 }
