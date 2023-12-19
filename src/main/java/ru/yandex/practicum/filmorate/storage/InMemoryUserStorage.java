@@ -31,7 +31,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User updateUser(User user) {
-       return users.replace(user.getId(), user);
+        return users.replace(user.getId(), user);
     }
 
     @Override
@@ -41,10 +41,12 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public void deleteUser(int id) {
-      users.remove(id);
+        users.remove(id);
     }
+
     @Override
     public List<Integer> findAllUsersId() {
         return new ArrayList<>(users.keySet());
     }
+    
 }
