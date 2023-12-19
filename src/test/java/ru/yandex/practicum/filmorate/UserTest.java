@@ -37,7 +37,7 @@ public class UserTest {
                 .build();
         User user2 = User.builder()
                 .id(2)
-                .email("user2@yandex.ru")
+                .email("user2yandex.ru")
                 .login("user2")
                 .name("Вася")
                 .birthday(LocalDate.of(2000, 6, 12))
