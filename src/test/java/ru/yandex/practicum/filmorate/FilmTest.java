@@ -30,9 +30,27 @@ public class FilmTest {
 
     @Test
     public void filmNameTest() {
-        Film film1 = new Film(1, "Терминатор", "Про роботов", LocalDate.of(1990, 12, 20), 120);
-        Film film2 = new Film(2, null, "Про роботов", LocalDate.of(1990, 12, 20), 120);
-        Film film3 = new Film(3, "", "Про роботов", LocalDate.of(1990, 12, 20), 120);
+        Film film1 = Film.builder()
+                .id(1)
+                .name("Терминатор")
+                .description("Про роботов")
+                .releaseDate(LocalDate.of(1990, 12, 20))
+                .duration(120)
+                .build();
+        Film film2 = Film.builder()
+                .id(2)
+                .name(null)
+                .description("Про роботов")
+                .releaseDate(LocalDate.of(1990, 12, 20))
+                .duration(120)
+                .build();
+        Film film3 = Film.builder()
+                .id(3)
+                .name("")
+                .description("Про роботов")
+                .releaseDate(LocalDate.of(1990, 12, 20))
+                .duration(120)
+                .build();
         Set<ConstraintViolation<Film>> violations = validator.validate(film2);
         assertEquals(violations.size(), 1);
         violations = validator.validate(film1);
@@ -43,11 +61,29 @@ public class FilmTest {
 
     @Test
     public void filmDescriptionTest() {
-        Film film1 = new Film(1, "Терминатор", "", LocalDate.of(1990, 12, 20), 120);
-        Film film2 = new Film(2, "Терминатор 2", null, LocalDate.of(1990, 12, 20), 120);
-        Film film3 = new Film(3, "Терминатор 3", "Про роботов Про роботов Про роботов Про роботов " +
-                "Про роботов Про роботов Про роботов Про роботов Про роботов Про роботов Про роботов Про роботов Про роботов" +
-                "Про роботов Про роботов Про роботов Про роботов Про роботов Про роботов Про роботов", LocalDate.of(1990, 12, 20), 120);
+        Film film1 = Film.builder()
+                .id(1)
+                .name("Терминатор")
+                .description("")
+                .releaseDate(LocalDate.of(1990, 12, 20))
+                .duration(120)
+                .build();
+        Film film2 = Film.builder()
+                .id(2)
+                .name("Терминатор 2")
+                .description(null)
+                .releaseDate(LocalDate.of(1990, 12, 20))
+                .duration(120)
+                .build();
+        Film film3 = Film.builder()
+                .id(3)
+                .name("Терминатор 3")
+                .description("Про роботов Про роботов Про роботов Про роботов Про роботов Про роботов Про роботов " +
+                        "Про роботов Про роботов Про роботов Про роботов Про роботов Про роботов" +
+                        "Про роботов Про роботов Про роботов Про роботов Про роботов Про роботов Про роботов Про роботов")
+                .releaseDate(LocalDate.of(1990, 12, 20))
+                .duration(120)
+                .build();
         Set<ConstraintViolation<Film>> violations = validator.validate(film2);
         assertEquals(violations.size(), 1);
         violations = validator.validate(film1);
@@ -58,8 +94,20 @@ public class FilmTest {
 
     @Test
     public void filmDateTest() {
-        Film film1 = new Film(1, "Терминатор", "Про роботов", LocalDate.of(1690, 12, 20), 120);
-        Film film2 = new Film(2, "Терминатор 2", "Про роботов", LocalDate.of(1990, 12, 20), 120);
+        Film film1 = Film.builder()
+                .id(1)
+                .name("Терминатор")
+                .description("Про роботов")
+                .releaseDate(LocalDate.of(1690, 12, 20))
+                .duration(120)
+                .build();
+        Film film2 = Film.builder()
+                .id(2)
+                .name("Терминатор 2")
+                .description("Про роботов")
+                .releaseDate(LocalDate.of(1990, 12, 20))
+                .duration(120)
+                .build();
         Set<ConstraintViolation<Film>> violations = validator.validate(film2);
         assertEquals(violations.size(), 0);
         violations = validator.validate(film1);
@@ -68,9 +116,27 @@ public class FilmTest {
 
     @Test
     public void filmDurationTest() {
-        Film film1 = new Film(1, "Терминатор", "Про роботов", LocalDate.of(1990, 12, 20), 0);
-        Film film2 = new Film(2, "Терминатор 2", "Про роботов", LocalDate.of(1990, 12, 20), 120);
-        Film film3 = new Film(3, "Терминатор 3", "Про роботов", LocalDate.of(1990, 12, 20), -2);
+        Film film1 = Film.builder()
+                .id(1)
+                .name("Терминатор")
+                .description("Про роботов")
+                .releaseDate(LocalDate.of(1990, 12, 20))
+                .duration(0)
+                .build();
+        Film film2 = Film.builder()
+                .id(2)
+                .name("Терминатор 2")
+                .description("Про роботов")
+                .releaseDate(LocalDate.of(1990, 12, 20))
+                .duration(120)
+                .build();
+        Film film3 = Film.builder()
+                .id(3)
+                .name("Терминатор 3")
+                .description("Про роботов")
+                .releaseDate(LocalDate.of(1990, 12, 20))
+                .duration(-2)
+                .build();
         Set<ConstraintViolation<Film>> violations = validator.validate(film2);
         assertEquals(violations.size(), 0);
         violations = validator.validate(film1);

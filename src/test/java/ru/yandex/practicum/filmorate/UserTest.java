@@ -19,6 +19,7 @@ public class UserTest {
 
     private Validator validator;
 
+
     @BeforeEach
     public void setUp() {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
@@ -27,9 +28,27 @@ public class UserTest {
 
     @Test
     public void userMailTest() {
-        User user1 = new User(1, "user1@yandex.ru", "user1", "Петя", LocalDate.of(2000, 5, 11));
-        User user2 = new User(2, "user2yandex.ru", "user2", "Вася", LocalDate.of(2000, 6, 12));
-        User user3 = new User(3, "useryandex.ru@", "user3", "Шахоб", LocalDate.of(1997, 2, 20));
+        User user1 = User.builder()
+                .id(1)
+                .email("user1@yandex.ru")
+                .login("user1")
+                .name("Петя")
+                .birthday(LocalDate.of(2000, 5, 11))
+                .build();
+        User user2 = User.builder()
+                .id(2)
+                .email("user2yandex.ru")
+                .login("user2")
+                .name("Вася")
+                .birthday(LocalDate.of(2000, 6, 12))
+                .build();
+        User user3 = User.builder()
+                .id(3)
+                .email("useryandex.ru@")
+                .login("user3")
+                .name("Шахоб")
+                .birthday(LocalDate.of(1997, 2, 20))
+                .build();
         Set<ConstraintViolation<User>> violations = validator.validate(user2);
         assertEquals(violations.size(), 1);
         violations = validator.validate(user1);
@@ -40,8 +59,20 @@ public class UserTest {
 
     @Test
     public void userDateBirthdayTest() {
-        User user1 = new User(1, "user1@yandex.ru", "user1", "Петя", LocalDate.of(2024, 5, 11));
-        User user2 = new User(2, "user2@yandex.ru", "user2", "Вася", LocalDate.of(2000, 6, 12));
+        User user1 = User.builder()
+                .id(1)
+                .email("user1@yandex.ru")
+                .login("user1")
+                .name("Петя")
+                .birthday(LocalDate.of(2024, 5, 11))
+                .build();
+        User user2 = User.builder()
+                .id(2)
+                .email("user2@yandex.ru")
+                .login("user2")
+                .name("Вася")
+                .birthday(LocalDate.of(2000, 6, 12))
+                .build();
         Set<ConstraintViolation<User>> violations = validator.validate(user1);
         assertEquals(violations.size(), 1);
         violations = validator.validate(user2);
@@ -50,9 +81,27 @@ public class UserTest {
 
     @Test
     public void userLoginTest() {
-        User user1 = new User(1, "user1@yandex.ru", null, "Петя", LocalDate.of(2021, 5, 11));
-        User user2 = new User(2, "user2@yandex.ru", "user2", "Вася", LocalDate.of(2000, 6, 12));
-        User user3 = new User(3, "user1@yandex.ru", "user 1", "Петя", LocalDate.of(2021, 5, 11));
+        User user1 = User.builder()
+                .id(1)
+                .email("user1@yandex.ru")
+                .login(null)
+                .name("Петя")
+                .birthday(LocalDate.of(2021, 5, 11))
+                .build();
+        User user2 = User.builder()
+                .id(2)
+                .email("user2@yandex.ru")
+                .login("user2")
+                .name("Вася")
+                .birthday(LocalDate.of(2000, 6, 12))
+                .build();
+        User user3 = User.builder()
+                .id(3)
+                .email("user1@yandex.ru")
+                .login("user 1")
+                .name("Петя")
+                .birthday(LocalDate.of(2021, 5, 11))
+                .build();
         Set<ConstraintViolation<User>> violations = validator.validate(user1);
         assertEquals(violations.size(), 2);
         violations = validator.validate(user2);
