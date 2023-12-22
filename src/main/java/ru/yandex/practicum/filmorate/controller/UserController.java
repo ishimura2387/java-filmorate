@@ -21,9 +21,10 @@ public class UserController {
 
     @GetMapping
     public List<User> findAllUsers() {
+        List<User> users = userService.findAllUsers();
         log.debug("Обработка запроса GET /users; Текущее количество пользователей: {}",
-                userService.findAllUsers().size());
-        return userService.findAllUsers();
+                users.size());
+        return users;
     }
 
 
@@ -38,7 +39,7 @@ public class UserController {
 
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
-        if (userService.findAllUsersId().contains(user.getId())) {
+        if (userService.finduser(user.getId())) {
             if (user.getName() == null || user.getName().isBlank()) {
                 user.setName(user.getLogin());
             }
@@ -53,7 +54,7 @@ public class UserController {
 
     @DeleteMapping
     public void deleteUser(@Valid @RequestBody User user) {
-        if (userService.findAllUsers().contains(user)) {
+        if (userService.finduser(user.getId())) {
             userService.deleteUser(user);
             log.debug("Пользователь удален: {}", user);
         } else {
@@ -64,9 +65,10 @@ public class UserController {
 
     @GetMapping("/{id}")
     public User getUser(@PathVariable int id) {
-        if (userService.findAllUsers().contains(userService.getUser(id))) {
-            log.debug("Запрошен пользователь: {}", userService.getUser(id));
-            return userService.getUser(id);
+        if (userService.finduser(id)) {
+            User user = userService.getUser(id);
+            log.debug("Запрошен пользователь: {}", user);
+            return user;
         } else {
             log.debug("Пользователь не найден!");
             throw new NullObjectException("Пользователь не найден!");
@@ -75,9 +77,8 @@ public class UserController {
 
     @PutMapping("/{id}/friends/{friendId}")
     public void addFriends(@PathVariable int id, @PathVariable int friendId) {
-        if (userService.findAllUsers().contains(userService.getUser(id)) &&
-                userService.findAllUsers().contains(userService.getUser(friendId)) &&
-                !getFriends(id).contains(getUser(friendId)) && !getFriends(friendId).contains(getUser(id))) {
+        if (userService.finduser(id) && userService.finduser(friendId) && !getFriends(id).contains(friendId) &&
+                !getFriends(friendId).contains(id)) {
             userService.addFriends(id, friendId);
             log.debug("Добавление в друзья прошло успешно");
         } else {
@@ -88,8 +89,8 @@ public class UserController {
 
     @DeleteMapping("/{id}/friends/{friendId}")
     public void deleteFriends(@PathVariable int id, @PathVariable int friendId) {
-        if (userService.findAllUsers().contains(userService.getUser(id)) &&
-                userService.findAllUsers().contains(userService.getUser(friendId))) {
+        if (userService.finduser(id) &&
+                userService.finduser(friendId)) {
             userService.deleteFriends(id, friendId);
             log.debug("Удаление из друзей прошло успешно");
         } else {
@@ -100,9 +101,9 @@ public class UserController {
 
     @GetMapping("/{id}/friends")
     public List<User> getFriends(@PathVariable int id) {
-        if (userService.findAllUsers().contains(userService.getUser(id))) {
+        if (userService.finduser(id)) {
             log.debug("Обработка запроса getFriends успешно");
-            return userService.getF(id);
+            return userService.getFriends(id);
         } else {
             log.debug("Пользователь не найден!");
             throw new NullObjectException("Пользователь не найден!");
@@ -111,8 +112,7 @@ public class UserController {
 
     @GetMapping("/{id}/friends/common/{otherId}")
     public List<User> getTotalFriends(@PathVariable int id, @PathVariable int otherId) {
-        if (userService.findAllUsers().contains(userService.getUser(id)) &&
-                userService.findAllUsers().contains(userService.getUser(otherId))) {
+        if (userService.finduser(id) && userService.finduser(otherId)) {
             log.debug("Поиск общих друзей прошел успешно");
             return userService.findTotalFriends(id, otherId);
         } else {

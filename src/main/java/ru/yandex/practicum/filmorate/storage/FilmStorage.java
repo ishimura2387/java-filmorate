@@ -19,4 +19,5 @@ public interface FilmStorage {
     int getCounterFilmId();
 
     List<Integer> findAllFilmsId();
+
 }

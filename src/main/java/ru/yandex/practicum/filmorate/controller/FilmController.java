@@ -22,8 +22,9 @@ public class FilmController {
 
     @GetMapping()
     public List<Film> findAllFilms() {
-        log.debug("Обработка запроса GET /films; Текущее количество фильмов: {}", filmService.findAllFilms().size());
-        return filmService.findAllFilms();
+        List<Film> films = filmService.findAllFilms();
+        log.debug("Обработка запроса GET /films; Текущее количество фильмов: {}", films.size());
+        return films;
     }
 
     @PostMapping()
@@ -34,7 +35,7 @@ public class FilmController {
 
     @PutMapping()
     public Film updateFilm(@Valid @RequestBody Film film) {
-        if (filmService.findAllFilmsId().contains(film.getId())) {
+        if (filmService.findFilm(film.getId())) {
             filmService.updateFilm(film);
             log.debug("Изменен фильм: {}", film);
             return film;
@@ -46,9 +47,9 @@ public class FilmController {
 
     @DeleteMapping
     public void deleteFilm(@Valid @RequestBody Film film) {
-        if (filmService.findAllFilms().contains(film)) {
+        if (filmService.findFilm(film.getId())) {
             filmService.deleteFilm(film.getId());
-            log.debug("Удален фильм: {}", filmService.getFilm(film.getId()));
+            log.debug("Удален фильм: {}", film);
         } else {
             log.debug("Фильм не найден!");
             throw new NullObjectException("Фильм не найден!");
@@ -57,9 +58,10 @@ public class FilmController {
 
     @GetMapping("/{id}")
     public Film getFilm(@PathVariable int id) {
-        if (filmService.findAllFilms().contains(filmService.getFilm(id))) {
-            log.debug("Запрошен фильм: {}", filmService.getFilm(id));
-            return filmService.getFilm(id);
+        if (filmService.findFilm(id)) {
+            Film film = filmService.getFilm(id);
+            log.debug("Запрошен фильм: {}", film);
+            return film;
         } else {
             log.debug("Фильм не найден!");
             throw new NullObjectException("Фильм не найден!");
@@ -68,17 +70,16 @@ public class FilmController {
 
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable int userId, @PathVariable int id) {
-        if (findAllFilms().contains(getFilm(id)) &&
-                userService.findAllUsers().contains(userService.getUser(userId)) &&
-                !getFilm(id).getLikes().contains(userService.getUser(userId))) {
+        boolean checkFilm = filmService.findFilm(id);
+        if (checkFilm && userService.finduser(id) && !getFilm(id).getLikes().contains(userId)) {
             filmService.addLike(userId, id);
             log.debug("Запрос добавления лайка");
         } else {
-            if (!filmService.findAllFilms().contains(filmService.getFilm(id))) {
-                log.debug("Фильм не найден: {}", filmService.getFilm(id));
+            if (!checkFilm) {
+                log.debug("Фильм не найден. ID: {}", id);
                 throw new NullObjectException("Фильм не найден!");
             } else {
-                log.debug("Пользователь не найден: {}", userService.getUser(userId));
+                log.debug("Пользователь не найден. ID: {}", userId);
                 throw new NullObjectException("Пользователь не найден!");
             }
         }
@@ -86,16 +87,16 @@ public class FilmController {
 
     @DeleteMapping("/{id}/like/{userId}")
     public void deleteLike(@PathVariable int userId, @PathVariable int id) {
-        if (findAllFilms().contains(filmService.getFilm(id)) &&
-                userService.findAllUsers().contains(userService.getUser(userId))) {
+        boolean checkFilm = filmService.findFilm(id);
+        if (checkFilm && userService.finduser(userId)) {
             filmService.deleteLike(userId, id);
             log.debug("Запрос удаления лайка");
         } else {
-            if (!findAllFilms().contains(filmService.getFilm(id))) {
-                log.debug("Фильм не найден: {}", filmService.getFilm(id));
+            if (!checkFilm) {
+                log.debug("Фильм не найден. ID: {}", id);
                 throw new NullObjectException("Фильм не найден!");
             } else {
-                log.debug("Пользователь не найден: {}", userService.getUser(userId));
+                log.debug("Пользователь не найден. ID: {}", userId);
                 throw new NullObjectException("Пользователь не найден!");
             }
         }

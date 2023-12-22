@@ -28,5 +28,5 @@ public class User {
     private LocalDate birthday; // дата рождения
     @Singular
     @JsonIgnore
-    private final List<User> friends = new ArrayList<>();
+    private final List<Integer> friends = new ArrayList<>();
 }

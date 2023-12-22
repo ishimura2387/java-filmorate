@@ -47,30 +47,39 @@ public class UserService {
 
 
     public void addFriends(int idUser1, int idUser2) {
-        getUser(idUser1).getFriends().add(getUser(idUser2));
-        getUser(idUser2).getFriends().add(getUser(idUser1));
+        getUser(idUser1).getFriends().add(idUser2);
+        getUser(idUser2).getFriends().add(idUser1);
     }
 
     public void deleteFriends(int idUser1, int idUser2) {
-        getUser(idUser1).getFriends().remove(getUser(idUser2));
-        getUser(idUser2).getFriends().remove(getUser(idUser1));
+        getUser(idUser1).getFriends().remove(Integer.valueOf(idUser2));
+        getUser(idUser2).getFriends().remove(Integer.valueOf(idUser1));
     }
 
     public List<User> findTotalFriends(int idUser1, int idUser2) {
         List<User> totalFriends = new ArrayList<>();
         User user1 = getUser(idUser1);
-        List<User> friendsUser1 = user1.getFriends();
+        List<Integer> friendsUser1 = user1.getFriends();
         User user2 = getUser(idUser2);
-        List<User> friendsUser2 = user2.getFriends();
-        for (User user : friendsUser2) {
-            if (friendsUser1.contains(user)) {
-                totalFriends.add(user);
+        List<Integer> friendsUser2 = user2.getFriends();
+        for (Integer id : friendsUser2) {
+            if (friendsUser1.contains(id)) {
+                totalFriends.add(getUser(id));
             }
         }
         return totalFriends;
     }
 
-    public List<User> getF(int id) {
-        return getUser(id).getFriends();
+    public List<User> getFriends(int id) {
+        List<Integer> listIdFriends = getUser(id).getFriends();
+        List<User> listUser = new ArrayList<>();
+        for (Integer idUser : listIdFriends) {
+            listUser.add(getUser(idUser));
+        }
+        return listUser;
+    }
+
+    public boolean finduser(int id) {
+        return findAllUsersId().contains(id);
     }
 }

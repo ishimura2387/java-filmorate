@@ -44,11 +44,11 @@ public class FilmService {
 
 
     public void addLike(int idUser, int idFilm) {
-        getFilm(idFilm).getLikes().add(inMemoryUserStorage.getUser(idUser));
+        getFilm(idFilm).getLikes().add(idUser);
     }
 
     public void deleteLike(int idUser, int idFilm) {
-        getFilm(idFilm).getLikes().remove(inMemoryUserStorage.getUser(idUser));
+        getFilm(idFilm).getLikes().remove(Integer.valueOf(idUser));
     }
 
     public List<Film> getPopularFilms(int id) {
@@ -62,5 +62,9 @@ public class FilmService {
             popularFilms.add(films.get(i));
         }
         return popularFilms;
+    }
+
+    public boolean findFilm(int id) {
+        return findAllFilmsId().contains(id);
     }
 }

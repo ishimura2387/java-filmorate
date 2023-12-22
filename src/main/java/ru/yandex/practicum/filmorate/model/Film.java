@@ -30,7 +30,7 @@ public class Film implements Comparable<Film> {
     @Min(value = 1)
     private int duration; // продолжительность фильма
     @Singular
-    private final List<User> likes = new ArrayList<>();
+    private final List<Integer> likes = new ArrayList<>();
 
     @Override
     public int compareTo(Film film) {
