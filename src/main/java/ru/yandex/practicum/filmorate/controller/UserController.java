@@ -1,52 +1,123 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exeption.ValidationUserExeption;
+import ru.yandex.practicum.filmorate.exception.NullObjectException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
 
 
 @RestController
 @Slf4j
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
-    private final Map<Integer, User> users = new HashMap<>();
-    private int counterUserId = 1;
+
+    private final UserService userService;
 
     @GetMapping
     public List<User> findAllUsers() {
-        log.debug("Обработка запроса GET /users; Текущее количество пользователей: {}", users.size());
-        return new ArrayList<>(users.values());
+        List<User> users = userService.findAllUsers();
+        log.debug("Обработка запроса GET /users; Текущее количество пользователей: {}",
+                users.size());
+        return users;
     }
 
+
     @PostMapping
-    public User createUser(@Valid @RequestBody User user) throws ValidationUserExeption {
+    public User createUser(@Valid @RequestBody User user) {
         if (user.getName() == null || user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
-        user.setId(counterUserId);
-        users.put(counterUserId, user);
-        counterUserId++;
-        return user;
+        log.debug("Создан пользователь: {}", user);
+        return userService.createUser(user);
     }
 
     @PutMapping
-    public User patchUser(@Valid @RequestBody User user) {
-        if (users.containsKey(user.getId())) {
+    public User updateUser(@Valid @RequestBody User user) {
+        if (userService.finduser(user.getId())) {
             if (user.getName() == null || user.getName().isBlank()) {
                 user.setName(user.getLogin());
             }
-            users.replace(user.getId(), user);
+            userService.updateUser(user);
+            log.debug("Пользователь изменен: {}", user);
             return user;
-        } else { // в этом и суть. Если пытаются обновить пользователя которого нет? нам нужно вернуть ошибку
+        } else {
             log.debug("Пользователь не найден!");
-            throw new ValidationUserExeption("Пользователь не найден!");
+            throw new NullObjectException("Пользователь не найден!");
+        }
+    }
+
+    @DeleteMapping
+    public void deleteUser(@Valid @RequestBody User user) {
+        if (userService.finduser(user.getId())) {
+            userService.deleteUser(user);
+            log.debug("Пользователь удален: {}", user);
+        } else {
+            log.debug("Пользователь не найден!");
+            throw new NullObjectException("Пользователь не найден!");
+        }
+    }
+
+    @GetMapping("/{id}")
+    public User getUser(@PathVariable int id) {
+        if (userService.finduser(id)) {
+            User user = userService.getUser(id);
+            log.debug("Запрошен пользователь: {}", user);
+            return user;
+        } else {
+            log.debug("Пользователь не найден!");
+            throw new NullObjectException("Пользователь не найден!");
+        }
+    }
+
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriends(@PathVariable int id, @PathVariable int friendId) {
+        if (userService.finduser(id) && userService.finduser(friendId) && !getFriends(id).contains(friendId) &&
+                !getFriends(friendId).contains(id)) {
+            userService.addFriends(id, friendId);
+            log.debug("Добавление в друзья прошло успешно");
+        } else {
+            log.debug("Ошибка добавления в друзья");
+            throw new NullObjectException("Пользователь не найден!");
+        }
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void deleteFriends(@PathVariable int id, @PathVariable int friendId) {
+        if (userService.finduser(id) &&
+                userService.finduser(friendId)) {
+            userService.deleteFriends(id, friendId);
+            log.debug("Удаление из друзей прошло успешно");
+        } else {
+            log.debug("Ошибка удаления из друзей");
+            throw new NullObjectException("Пользователь не найден!");
+        }
+    }
+
+    @GetMapping("/{id}/friends")
+    public List<User> getFriends(@PathVariable int id) {
+        if (userService.finduser(id)) {
+            log.debug("Обработка запроса getFriends успешно");
+            return userService.getFriends(id);
+        } else {
+            log.debug("Пользователь не найден!");
+            throw new NullObjectException("Пользователь не найден!");
+        }
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getTotalFriends(@PathVariable int id, @PathVariable int otherId) {
+        if (userService.finduser(id) && userService.finduser(otherId)) {
+            log.debug("Поиск общих друзей прошел успешно");
+            return userService.findTotalFriends(id, otherId);
+        } else {
+            log.debug("Ошибка поиска общих друзей");
+            throw new NullObjectException("Пользователь не найден!");
         }
     }
 }
