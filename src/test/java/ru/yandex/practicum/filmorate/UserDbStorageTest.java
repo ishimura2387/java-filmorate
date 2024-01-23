@@ -20,36 +20,22 @@ import static org.junit.Assert.*;
 class UserDbStorageTest {
     private final JdbcTemplate jdbcTemplate;
     UserDbStorage userStorage;
-    User user1 = User.builder()
-            .email("user21@yandex.ru")
-            .login("user1")
-            .name("Федя Пупкин")
-            .birthday(LocalDate.of(2000, 5, 11))
-            .build();
-    User user2 = User.builder()
-            .email("user2@yandex.ru")
-            .login("user2")
-            .name("Олежа")
-            .birthday(LocalDate.of(2000, 5, 11))
-            .build();
-    User user3 = User.builder()
-            .email("user3@yandex.ru")
-            .login("user3")
-            .name("Никодим")
-            .birthday(LocalDate.of(2000, 5, 11))
-            .build();
+    User user1 = userStorage.getUser(1);
+    User user2 = userStorage.getUser(2);
+    User user3 = userStorage.getUser(3);
 
     @BeforeEach
     public void beforeEach() {
         userStorage = new UserDbStorage(jdbcTemplate);
-        userStorage.createNewUser(user1);
-        userStorage.createNewUser(user2);
-        userStorage.createNewUser(user3);
     }
 
     @AfterEach
     public void afterEach() {
         jdbcTemplate.update("ALTER TABLE USERS ALTER COLUMN ID RESTART WITH 1");
+        String sql = "DELETE FROM films";
+        jdbcTemplate.update(sql);
+        String sql2 = "DELETE FROM users";
+        jdbcTemplate.update(sql2);
     }
 
     @Test

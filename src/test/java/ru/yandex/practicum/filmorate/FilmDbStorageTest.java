@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
@@ -23,53 +24,13 @@ import static org.junit.Assert.*;
 public class FilmDbStorageTest {
     private final JdbcTemplate jdbcTemplate;
     FilmDbStorage filmStorage;
-    Mpa mpa1 = new Mpa(1, "G1");
-    Mpa mpa2 = new Mpa(2, "G2");
-    Mpa mpa3 = new Mpa(3, "G3");
-
-    Genre genre1 = Genre.builder()
-            .id(1)
-            .name("Комедия")
-            .build();
-    Genre genre2 = Genre.builder()
-            .id(2)
-            .name("Комедия")
-            .build();
-    Genre genre3 = Genre.builder()
-            .id(3)
-            .name("Триллер")
-            .build();
-    Film film1 = Film.builder()
-            .name("Человек паук")
-            .description("Описание к человеку пауку")
-            .releaseDate(LocalDate.parse("2012-05-21"))
-            .duration(120)
-            .mpa(mpa1)
-            .build();
-    Film film2 = Film.builder()
-            .name("Ирония судьбы")
-            .description("Описание к иронии судьбы")
-            .releaseDate(LocalDate.parse("1966-05-21"))
-            .duration(120)
-            .mpa(mpa2)
-            .build();
-    Film film3 = Film.builder()
-            .name("Человек паук 2")
-            .description("Описание к человеку пауку 2")
-            .releaseDate(LocalDate.parse("2013-05-21"))
-            .duration(122)
-            .mpa(mpa2)
-            .build();
+    Film film1 = filmStorage.getFilm(1);
+    Film film2 = filmStorage.getFilm(2);
+    Film film3 = filmStorage.getFilm(3);
 
     @BeforeEach
     public void beforeEach() {
         filmStorage = new FilmDbStorage(jdbcTemplate);
-        jdbcTemplate.update("INSERT INTO mpa (id, name) VALUES (?, ?)", mpa1.getId(), mpa1.getName());
-        jdbcTemplate.update("INSERT INTO mpa (id, name) VALUES (?, ?)", mpa2.getId(), mpa2.getName());
-        jdbcTemplate.update("INSERT INTO mpa (id, name) VALUES (?, ?)", mpa3.getId(), mpa3.getName());
-        jdbcTemplate.update("INSERT INTO genres (id, name) VALUES (?, ?)", genre1.getId(), genre1.getName());
-        jdbcTemplate.update("INSERT INTO genres (id, name) VALUES (?, ?)", genre2.getId(), genre2.getName());
-        jdbcTemplate.update("INSERT INTO genres (id, name) VALUES (?, ?)", genre3.getId(), genre3.getName());
         film1.setGenres(new TreeSet<>());
         film2.setGenres(new TreeSet<>());
         film3.setGenres(new TreeSet<>());
@@ -91,7 +52,7 @@ public class FilmDbStorageTest {
                 .description("Описание псов")
                 .releaseDate(LocalDate.parse("2006-05-21"))
                 .duration(120)
-                .mpa(mpa1)
+                .mpa(filmStorage.getMpa(1))
                 .build();
         film4.setGenres(new TreeSet<>());
         filmStorage.createNewFilm(film4);
@@ -118,7 +79,7 @@ public class FilmDbStorageTest {
                 .description("Описание трех котов")
                 .releaseDate(LocalDate.parse("2009-05-21"))
                 .duration(121)
-                .mpa(mpa1)
+                .mpa(filmStorage.getMpa(2))
                 .build();
         film6.setGenres(new TreeSet<>());
         filmStorage.createNewFilm(film6);
@@ -128,7 +89,7 @@ public class FilmDbStorageTest {
                 .description("Описание трех котов улучшенных")
                 .releaseDate(LocalDate.parse("2009-05-21"))
                 .duration(121)
-                .mpa(mpa1)
+                .mpa(filmStorage.getMpa(2))
                 .build();
         film6Update.setGenres(new TreeSet<>());
         filmStorage.updateFilm(film6Update);
@@ -151,6 +112,13 @@ public class FilmDbStorageTest {
         assertTrue(filmsId.contains(1));
         assertTrue(filmsId.contains(2));
         assertTrue(filmsId.contains(3));
+    }
+
+    private RowMapper<Genre> genreRowMapper() {
+        return (rs, rowNum) -> Genre.builder()
+                .id(rs.getInt("id"))
+                .name(rs.getString("name"))
+                .build();
     }
 
 }
