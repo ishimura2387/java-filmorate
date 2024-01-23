@@ -46,7 +46,7 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film updateFilm(Film film) {
-        String sql = "UPDATE films SET name = ?, description = ?, releaseDate = ?, duration = ?, MPA = ? WHERE id = ?";
+        String sql = "UPDATE films SET name = ?, description = ?, releaseDate = ?, duration = ?, mpa = ? WHERE id = ?";
         jdbcTemplate.update(sql, film.getName(), film.getDescription(), film.getReleaseDate().toString(),
                 film.getDuration(), film.getMpa().getId(), film.getId());
         TreeSet<Genre> genres = film.getGenres();

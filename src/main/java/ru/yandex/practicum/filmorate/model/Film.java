@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Singular;
 import ru.yandex.practicum.filmorate.annotation.MinimumDate;
 
 import javax.validation.constraints.Min;
@@ -29,6 +30,7 @@ public class Film implements Comparable<Film> {
     private LocalDate releaseDate; // дата релиза
     @Min(value = 1)
     private int duration; // продолжительность фильма
+    @Singular
     private List<Integer> likes = new ArrayList<>();
     private Mpa mpa;
     private TreeSet<Genre> genres = new TreeSet<>();

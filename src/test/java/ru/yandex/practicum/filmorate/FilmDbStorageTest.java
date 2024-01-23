@@ -70,7 +70,7 @@ public class FilmDbStorageTest {
         jdbcTemplate.update("INSERT INTO genres (id, name) VALUES (?, ?)", genre1.getId(), genre1.getName());
         jdbcTemplate.update("INSERT INTO genres (id, name) VALUES (?, ?)", genre2.getId(), genre2.getName());
         jdbcTemplate.update("INSERT INTO genres (id, name) VALUES (?, ?)", genre3.getId(), genre3.getName());
-        film1.setGenres(new TreeSet<>()));
+        film1.setGenres(new TreeSet<>());
         film2.setGenres(new TreeSet<>());
         film3.setGenres(new TreeSet<>());
         filmStorage.createNewFilm(film1);
