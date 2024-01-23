@@ -71,7 +71,7 @@ public class FilmController {
     @PutMapping("/{id}/like/{userId}")
     public void addLike(@PathVariable int userId, @PathVariable int id) {
         boolean checkFilm = filmService.findFilm(id);
-        if (checkFilm && userService.finduser(id) && !getFilm(id).getLikes().contains(userId)) {
+        if (checkFilm && userService.findUser(id) && !getFilm(id).getLikes().contains(userId)) {
             filmService.addLike(userId, id);
             log.debug("Запрос добавления лайка");
         } else {
@@ -88,7 +88,7 @@ public class FilmController {
     @DeleteMapping("/{id}/like/{userId}")
     public void deleteLike(@PathVariable int userId, @PathVariable int id) {
         boolean checkFilm = filmService.findFilm(id);
-        if (checkFilm && userService.finduser(userId)) {
+        if (checkFilm && userService.findUser(userId)) {
             filmService.deleteLike(userId, id);
             log.debug("Запрос удаления лайка");
         } else {

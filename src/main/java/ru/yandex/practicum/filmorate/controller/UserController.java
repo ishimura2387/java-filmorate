@@ -39,7 +39,7 @@ public class UserController {
 
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
-        if (userService.finduser(user.getId())) {
+        if (userService.findUser(user.getId())) {
             if (user.getName() == null || user.getName().isBlank()) {
                 user.setName(user.getLogin());
             }
@@ -54,7 +54,7 @@ public class UserController {
 
     @DeleteMapping
     public void deleteUser(@Valid @RequestBody User user) {
-        if (userService.finduser(user.getId())) {
+        if (userService.findUser(user.getId())) {
             userService.deleteUser(user);
             log.debug("Пользователь удален: {}", user);
         } else {
@@ -65,7 +65,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     public User getUser(@PathVariable int id) {
-        if (userService.finduser(id)) {
+        if (userService.findUser(id)) {
             User user = userService.getUser(id);
             log.debug("Запрошен пользователь: {}", user);
             return user;
@@ -77,7 +77,7 @@ public class UserController {
 
     @PutMapping("/{id}/friends/{friendId}")
     public void addFriends(@PathVariable int id, @PathVariable int friendId) {
-        if (userService.finduser(id) && userService.finduser(friendId) && !getFriends(id).contains(friendId) &&
+        if (userService.findUser(id) && userService.findUser(friendId) && !getFriends(id).contains(friendId) &&
                 !getFriends(friendId).contains(id)) {
             userService.addFriends(id, friendId);
             log.debug("Добавление в друзья прошло успешно");
@@ -89,8 +89,8 @@ public class UserController {
 
     @DeleteMapping("/{id}/friends/{friendId}")
     public void deleteFriends(@PathVariable int id, @PathVariable int friendId) {
-        if (userService.finduser(id) &&
-                userService.finduser(friendId)) {
+        if (userService.findUser(id) &&
+                userService.findUser(friendId)) {
             userService.deleteFriends(id, friendId);
             log.debug("Удаление из друзей прошло успешно");
         } else {
@@ -101,7 +101,7 @@ public class UserController {
 
     @GetMapping("/{id}/friends")
     public List<User> getFriends(@PathVariable int id) {
-        if (userService.finduser(id)) {
+        if (userService.findUser(id)) {
             log.debug("Обработка запроса getFriends успешно");
             return userService.getFriends(id);
         } else {
@@ -112,7 +112,7 @@ public class UserController {
 
     @GetMapping("/{id}/friends/common/{otherId}")
     public List<User> getTotalFriends(@PathVariable int id, @PathVariable int otherId) {
-        if (userService.finduser(id) && userService.finduser(otherId)) {
+        if (userService.findUser(id) && userService.findUser(otherId)) {
             log.debug("Поиск общих друзей прошел успешно");
             return userService.findTotalFriends(id, otherId);
         } else {

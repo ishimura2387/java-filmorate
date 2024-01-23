@@ -1,22 +1,27 @@
 package ru.yandex.practicum.filmorate.service;
 
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import org.springframework.stereotype.Service;
-import lombok.RequiredArgsConstructor;
-
-import java.util.*;
-
 import lombok.extern.slf4j.Slf4j;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.model.Mpa;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
+@Component
 public class FilmService {
 
-    private final FilmStorage inMemoryFilmStorage;
-    private final UserStorage inMemoryUserStorage;
+    @Autowired
+    @Qualifier("filmDbStorage")
+    private FilmStorage inMemoryFilmStorage;
 
     public List<Film> findAllFilms() {
         return inMemoryFilmStorage.findAllFilms();
@@ -44,11 +49,11 @@ public class FilmService {
 
 
     public void addLike(int idUser, int idFilm) {
-        getFilm(idFilm).getLikes().add(idUser);
+        inMemoryFilmStorage.addLike(idUser, idFilm);
     }
 
     public void deleteLike(int idUser, int idFilm) {
-        getFilm(idFilm).getLikes().remove(Integer.valueOf(idUser));
+        inMemoryFilmStorage.deleteLike(idUser, idFilm);
     }
 
     public List<Film> getPopularFilms(int id) {
@@ -66,5 +71,29 @@ public class FilmService {
 
     public boolean findFilm(int id) {
         return findAllFilmsId().contains(id);
+    }
+
+    public List<Genre> findAllGenres() {
+        return inMemoryFilmStorage.findAllGenres();
+    }
+
+    public Genre getGenre(int id) {
+        return inMemoryFilmStorage.getGenre(id);
+    }
+
+    public List<Mpa> findAllMpas() {
+        return inMemoryFilmStorage.findAllMpas();
+    }
+
+    public Mpa getMpa(int id) {
+        return inMemoryFilmStorage.getMpa(id);
+    }
+
+    public List<Integer> findAllMpasId() {
+        return inMemoryFilmStorage.findAllMpasId();
+    }
+
+    public List<Integer> findAllGenresId() {
+        return inMemoryFilmStorage.findAllGenresId();
     }
 }

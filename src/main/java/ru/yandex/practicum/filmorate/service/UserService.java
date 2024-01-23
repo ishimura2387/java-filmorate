@@ -1,24 +1,26 @@
 package ru.yandex.practicum.filmorate.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.filmorate.model.User;
-import org.springframework.stereotype.Service;
-
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import ru.yandex.practicum.filmorate.storage.UserStorage;
-
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
+@Component
 public class UserService {
 
-    private final UserStorage inMemoryUserStorage;
+    @Autowired
+    @Qualifier("userDbStorage")
+    private UserStorage inMemoryUserStorage;
 
     public List<User> findAllUsers() {
         return inMemoryUserStorage.findAllUsers();
@@ -47,39 +49,30 @@ public class UserService {
 
 
     public void addFriends(int idUser1, int idUser2) {
-        getUser(idUser1).getFriends().add(idUser2);
-        getUser(idUser2).getFriends().add(idUser1);
+        inMemoryUserStorage.addFriends(idUser1, idUser2);
     }
 
     public void deleteFriends(int idUser1, int idUser2) {
-        getUser(idUser1).getFriends().remove(Integer.valueOf(idUser2));
-        getUser(idUser2).getFriends().remove(Integer.valueOf(idUser1));
+        inMemoryUserStorage.deleteFriends(idUser1, idUser2);
     }
 
     public List<User> findTotalFriends(int idUser1, int idUser2) {
         List<User> totalFriends = new ArrayList<>();
-        User user1 = getUser(idUser1);
-        List<Integer> friendsUser1 = user1.getFriends();
-        User user2 = getUser(idUser2);
-        List<Integer> friendsUser2 = user2.getFriends();
-        for (Integer id : friendsUser2) {
-            if (friendsUser1.contains(id)) {
-                totalFriends.add(getUser(id));
+        List<User> friendsUser1 = inMemoryUserStorage.getFriends(idUser1);
+        List<User> friendsUser2 = inMemoryUserStorage.getFriends(idUser2);
+        for (User user : friendsUser2) {
+            if (friendsUser1.contains(user)) {
+                totalFriends.add(user);
             }
         }
         return totalFriends;
     }
 
     public List<User> getFriends(int id) {
-        List<Integer> listIdFriends = getUser(id).getFriends();
-        List<User> listUser = new ArrayList<>();
-        for (Integer idUser : listIdFriends) {
-            listUser.add(getUser(idUser));
-        }
-        return listUser;
+        return inMemoryUserStorage.getFriends(id);
     }
 
-    public boolean finduser(int id) {
+    public boolean findUser(int id) {
         return findAllUsersId().contains(id);
     }
 }

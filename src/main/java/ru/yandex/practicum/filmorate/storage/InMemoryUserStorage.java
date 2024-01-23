@@ -1,15 +1,15 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import lombok.RequiredArgsConstructor;
-import ru.yandex.practicum.filmorate.model.User;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Component
+@Component("inMemoryUserStorage")
 @RequiredArgsConstructor
 public class InMemoryUserStorage implements UserStorage {
 
@@ -47,5 +47,27 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public List<Integer> findAllUsersId() {
         return new ArrayList<>(users.keySet());
+    }
+
+    @Override
+    public List<User> getFriends(int id) {
+        List<Integer> listIdFriends = getUser(id).getFriends();
+        List<User> listUser = new ArrayList<>();
+        for (Integer idUser : listIdFriends) {
+            listUser.add(getUser(idUser));
+        }
+        return listUser;
+    }
+
+    @Override
+    public void addFriends(int idUser, int idFriend) {
+        getUser(idUser).getFriends().add(Integer.valueOf(idFriend));
+        getUser(idFriend).getFriends().add(Integer.valueOf(idUser));
+    }
+
+    @Override
+    public void deleteFriends(int idUser, int idFriend) {
+        getUser(idUser).getFriends().remove(Integer.valueOf(idFriend));
+        getUser(idFriend).getFriends().remove(Integer.valueOf(idUser));
     }
 }
