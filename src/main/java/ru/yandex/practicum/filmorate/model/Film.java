@@ -32,7 +32,6 @@ public class Film implements Comparable<Film> {
     private List<Integer> likes = new ArrayList<>();
     private Mpa mpa;
     private TreeSet<Genre> genres = new TreeSet<>();
-    
     @Override
     public int compareTo(Film film) {
         return this.getLikes().size() - film.getLikes().size();
