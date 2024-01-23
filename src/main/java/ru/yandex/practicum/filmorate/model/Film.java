@@ -1,11 +1,8 @@
 package ru.yandex.practicum.filmorate.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-
 import lombok.Builder;
-
 import lombok.Data;
-
 import ru.yandex.practicum.filmorate.annotation.MinimumDate;
 
 import javax.validation.constraints.Min;
