@@ -7,9 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
 
@@ -19,25 +17,50 @@ import java.util.TreeSet;
 
 import static org.junit.Assert.*;
 
-@JdbcTest
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
+@JdbcTest
 public class FilmDbStorageTest {
+
     private final JdbcTemplate jdbcTemplate;
-    FilmDbStorage filmStorage;
-    Film film1 = filmStorage.getFilm(1);
-    Film film2 = filmStorage.getFilm(2);
-    Film film3 = filmStorage.getFilm(3);
+    public FilmDbStorage filmStorage;
+    Film film1;
+    Film film2;
+    Film film3;
+
 
     @BeforeEach
     public void beforeEach() {
         filmStorage = new FilmDbStorage(jdbcTemplate);
+        film1 = Film.builder()
+                .name("Гравицапа")
+                .description("Описание гравицапы")
+                .releaseDate(LocalDate.parse("1966-05-21"))
+                .duration(120)
+                .mpa(jdbcTemplate.queryForObject("SELECT * FROM mpa WHERE id = 3", (rs, rowNum) ->
+                        new Mpa(rs.getInt("id"), rs.getString("name"))))
+                .build();
+        film2 = Film.builder()
+                .name("Гарри Поттер")
+                .description("Описание Гарри Поттера")
+                .releaseDate(LocalDate.parse("1966-05-21"))
+                .duration(120)
+                .mpa(jdbcTemplate.queryForObject("SELECT * FROM mpa WHERE id = 3", (rs, rowNum) ->
+                        new Mpa(rs.getInt("id"), rs.getString("name"))))
+                .build();
+        film3 = Film.builder()
+                .name("Форсаж")
+                .description("Описание Форсажа")
+                .releaseDate(LocalDate.parse("1966-05-21"))
+                .duration(120)
+                .mpa(jdbcTemplate.queryForObject("SELECT * FROM mpa WHERE id = 3", (rs, rowNum) ->
+                        new Mpa(rs.getInt("id"), rs.getString("name"))))
+                .build();
         film1.setGenres(new TreeSet<>());
         film2.setGenres(new TreeSet<>());
         film3.setGenres(new TreeSet<>());
         filmStorage.createNewFilm(film1);
         filmStorage.createNewFilm(film2);
         filmStorage.createNewFilm(film3);
-
     }
 
     @AfterEach
@@ -48,16 +71,17 @@ public class FilmDbStorageTest {
     @Test
     public void testCreateNewFilmAndGetFilm() {
         Film film4 = Film.builder()
-                .name("Бешеные псы")
-                .description("Описание псов")
-                .releaseDate(LocalDate.parse("2006-05-21"))
+                .name("Гравицапа")
+                .description("Описание гравицапы")
+                .releaseDate(LocalDate.parse("1966-05-21"))
                 .duration(120)
-                .mpa(filmStorage.getMpa(1))
+                .mpa(jdbcTemplate.queryForObject("SELECT * FROM mpa WHERE id = 3", (rs, rowNum) ->
+                        new Mpa(rs.getInt("id"), rs.getString("name"))))
                 .build();
         film4.setGenres(new TreeSet<>());
         filmStorage.createNewFilm(film4);
         Film film5 = filmStorage.getFilm(4);
-        assertEquals(film4, film5);
+        assertEquals(film5, film4);
     }
 
     @Test
@@ -74,27 +98,29 @@ public class FilmDbStorageTest {
 
     @Test
     public void testUpdateFilm() {
-        Film film6 = Film.builder()
-                .name("Три кота")
-                .description("Описание трех котов")
+        Film film4 = Film.builder()
+                .name("Доярка из Хацапетовки")
+                .description("Описание Доярки")
                 .releaseDate(LocalDate.parse("2009-05-21"))
                 .duration(121)
-                .mpa(filmStorage.getMpa(2))
+                .mpa(jdbcTemplate.queryForObject("SELECT * FROM mpa WHERE id = 3", (rs, rowNum) ->
+                        new Mpa(rs.getInt("id"), rs.getString("name"))))
                 .build();
-        film6.setGenres(new TreeSet<>());
-        filmStorage.createNewFilm(film6);
-        Film film6Update = Film.builder()
+        film4.setGenres(new TreeSet<>());
+        filmStorage.createNewFilm(film4);
+        Film film4Update = Film.builder()
                 .id(4)
-                .name("Три кота улучшенные")
-                .description("Описание трех котов улучшенных")
+                .name("Доярка из Хацапетовки улучшенная")
+                .description("Описание Доярки улучшенной")
                 .releaseDate(LocalDate.parse("2009-05-21"))
                 .duration(121)
-                .mpa(filmStorage.getMpa(2))
+                .mpa(jdbcTemplate.queryForObject("SELECT * FROM mpa WHERE id = 3", (rs, rowNum) ->
+                        new Mpa(rs.getInt("id"), rs.getString("name"))))
                 .build();
-        film6Update.setGenres(new TreeSet<>());
-        filmStorage.updateFilm(film6Update);
-        Film film7 = filmStorage.getFilm(4);
-        assertEquals(film6Update, film7);
+        film4Update.setGenres(new TreeSet<>());
+        filmStorage.updateFilm(film4Update);
+        Film film5 = filmStorage.getFilm(4);
+        assertEquals(film4Update, film5);
     }
 
     @Test
@@ -113,12 +139,4 @@ public class FilmDbStorageTest {
         assertTrue(filmsId.contains(2));
         assertTrue(filmsId.contains(3));
     }
-
-    private RowMapper<Genre> genreRowMapper() {
-        return (rs, rowNum) -> Genre.builder()
-                .id(rs.getInt("id"))
-                .name(rs.getString("name"))
-                .build();
-    }
-
 }

@@ -20,22 +20,39 @@ import static org.junit.Assert.*;
 class UserDbStorageTest {
     private final JdbcTemplate jdbcTemplate;
     UserDbStorage userStorage;
-    User user1 = userStorage.getUser(1);
-    User user2 = userStorage.getUser(2);
-    User user3 = userStorage.getUser(3);
+    User user1;
+    User user2;
+    User user3;
 
     @BeforeEach
     public void beforeEach() {
         userStorage = new UserDbStorage(jdbcTemplate);
+        user1 = User.builder()
+                .email("user21@yandex.ru")
+                .login("user1")
+                .name("Вася Пупкин")
+                .birthday(LocalDate.of(2000, 5, 11))
+                .build();
+        user2 = User.builder()
+                .email("user2@yandex.ru")
+                .login("user2")
+                .name("Александр Черданцев")
+                .birthday(LocalDate.of(2000, 5, 11))
+                .build();
+        user3 = User.builder()
+                .email("user3@yandex.ru")
+                .login("user3")
+                .name("Сонечка Людоедова")
+                .birthday(LocalDate.of(2000, 5, 11))
+                .build();
+        userStorage.createNewUser(user1);
+        userStorage.createNewUser(user2);
+        userStorage.createNewUser(user3);
     }
 
     @AfterEach
     public void afterEach() {
         jdbcTemplate.update("ALTER TABLE USERS ALTER COLUMN ID RESTART WITH 1");
-        String sql = "DELETE FROM films";
-        jdbcTemplate.update(sql);
-        String sql2 = "DELETE FROM users";
-        jdbcTemplate.update(sql2);
     }
 
     @Test
@@ -43,7 +60,7 @@ class UserDbStorageTest {
         User user4 = User.builder()
                 .email("user4@yandex.ru")
                 .login("user4")
-                .name("Александр Черданцев")
+                .name("Борис Борисович Надеждин")
                 .birthday(LocalDate.of(2000, 5, 11))
                 .build();
         userStorage.createNewUser(user4);
@@ -64,7 +81,7 @@ class UserDbStorageTest {
         User user6 = User.builder()
                 .email("user6@yandex.ru")
                 .login("user6")
-                .name("Гарри Поттер")
+                .name("Анатолий Чубайс")
                 .birthday(LocalDate.of(2000, 5, 11))
                 .build();
         userStorage.createNewUser(user6);
@@ -72,7 +89,7 @@ class UserDbStorageTest {
                 .id(4)
                 .email("user6Update@yandex.ru")
                 .login("user6Update")
-                .name("Улучшенный Гарри Поттер")
+                .name("Анатолий Чубайс улучшенный")
                 .birthday(LocalDate.of(2000, 5, 11))
                 .build();
         userStorage.updateUser(user6Update);
@@ -118,5 +135,4 @@ class UserDbStorageTest {
         assertTrue(user3FriendsAfterDelete.contains(user2));
         assertFalse(user3FriendsAfterDelete.contains(user1));
     }
-
 }
