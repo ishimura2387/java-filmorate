@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS films (
     description varchar(255) NOT NULL,
     releaseDate date NOT NULL,
     duration integer NOT NULL,
+    likes integer,
     mpa integer NOT NULL REFERENCES mpa (id) ON DELETE RESTRICT
 );
 CREATE TABLE IF NOT EXISTS genres (

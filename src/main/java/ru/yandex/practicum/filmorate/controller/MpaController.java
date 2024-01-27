@@ -6,9 +6,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.yandex.practicum.filmorate.exception.NullObjectException;
 import ru.yandex.practicum.filmorate.model.Mpa;
-import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.MpaService;
 
 import java.util.List;
 
@@ -17,25 +16,15 @@ import java.util.List;
 @Slf4j
 @RequestMapping("/mpa")
 public class MpaController {
-    private final FilmService mpaService;
+    private final MpaService mpaService;
 
     @GetMapping
     public List<Mpa> findAllMpa() {
-        List<Mpa> mpas = mpaService.findAllMpas();
-        log.debug("Обработка запроса GET /mpa; Текущее количество mpa: {}",
-                mpas.size());
-        return mpas;
+        return mpaService.findAllMpas();
     }
 
     @GetMapping("/{id}")
     public Mpa getMpa(@PathVariable int id) {
-        if (mpaService.findAllMpasId().contains(id)) {
-            Mpa mpa = mpaService.getMpa(id);
-            log.debug("Запрошен mpa: {}", mpa);
-            return mpa;
-        } else {
-            log.debug("mpa не найден!");
-            throw new NullObjectException("mpa не найден!");
-        }
+        return mpaService.getMpa(id);
     }
 }

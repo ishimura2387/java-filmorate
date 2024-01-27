@@ -22,7 +22,8 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> findAllFilms() {
-        String sql = "SELECT * FROM films";
+        String sql = "SELECT f.id film_id, f.name film_name, f.description, f.releasedate, f.duration, f.likes, m.id mpa_id, " +
+                "m.name mpa_name FROM films f LEFT JOIN mpa m ON f.mpa = m.id";
         List<Film> films = jdbcTemplate.query(sql, filmRowMapper());
         return films;
     }
@@ -63,7 +64,8 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public Film getFilm(int id) {
-        String sql = "SELECT * FROM films WHERE id = ?";
+        String sql = "SELECT f.id film_id, f.name film_name, f.description, f.releasedate, f.duration, f.likes, m.id mpa_id, " +
+                "m.name mpa_name FROM films f LEFT JOIN mpa m ON f.mpa = m.id WHERE f.id = ?";
         Film film = jdbcTemplate.queryForObject(sql, filmRowMapper(), id);
         return film;
     }
@@ -86,60 +88,37 @@ public class FilmDbStorage implements FilmStorage {
     }
 
     @Override
-    public List<Genre> findAllGenres() {
-        String sql = "SELECT * FROM genres";
-        List<Genre> genres = jdbcTemplate.query(sql, genreRowMapper());
-        return genres;
-    }
-
-    @Override
-    public Genre getGenre(int id) {
-        String sql = "SELECT * FROM genres WHERE id = ?";
-        Genre genre = jdbcTemplate.queryForObject(sql, genreRowMapper(), id);
-        return genre;
-    }
-
-    @Override
-    public List<Mpa> findAllMpas() {
-        String sql = "SELECT * FROM MPA";
-        List<Mpa> mpas = jdbcTemplate.query(sql, (rs, rowNum) -> new Mpa(rs.getInt("id"), rs.getString("name")));
-        return mpas;
-    }
-
-    @Override
-    public Mpa getMpa(int id) {
-        String sql = "SELECT * FROM mpa WHERE id = ?";
-        Mpa mpa = jdbcTemplate.queryForObject(sql, (rs, rowNum) -> new Mpa(rs.getInt("id"), rs.getString("name")), id);
-        return mpa;
-    }
-
-    @Override
     public void addLike(int userId, int filmId) {
         String sql = "INSERT INTO films_likes (film_id, user_id) VALUES (?, ?)";
         jdbcTemplate.update(sql, userId, filmId);
+        String sqlLikes = "UPDATE films SET likes = ? WHERE id = ?";
+        Integer countLikes = jdbcTemplate.queryForObject("SELECT likes FROM films WHERE id = ?", (rs, rowNum) ->
+                Integer.valueOf(rs.getInt("likes")), filmId) + 1;
+        jdbcTemplate.update(sqlLikes, countLikes, filmId);
     }
 
     @Override
     public void deleteLike(int userId, int filmId) {
         String sql = "DELETE FROM films_likes WHERE film_id = ? AND user_id = ?";
         jdbcTemplate.update(sql, userId, filmId);
+        Integer countLikes = jdbcTemplate.queryForObject("SELECT likes FROM films WHERE id = ?", (rs, rowNum) ->
+                Integer.valueOf(rs.getInt("likes")), filmId) - 1;
+        String sqlLikes = "UPDATE films SET likes = ? WHERE id = ?";
+        jdbcTemplate.update(sqlLikes, countLikes, filmId);
     }
 
     private RowMapper<Film> filmRowMapper() {
         return (rs, rowNum) -> Film.builder()
-                .id(rs.getInt("id"))
-                .name(rs.getString("name"))
+                .id(rs.getInt("film_id"))
+                .name(rs.getString("film_name"))
                 .description(rs.getString("description"))
                 .releaseDate(rs.getDate("releasedate").toLocalDate())
                 .duration(rs.getInt("duration"))
-                .mpa(jdbcTemplate.queryForObject("SELECT * FROM mpa WHERE id = ?",
-                        (rs12, rowNum12) -> new Mpa(rs12.getInt("id"),
-                                rs12.getNString("name")), rs.getInt("mpa")))
+                .mpa(new Mpa(rs.getInt("mpa_id"), rs.getString("mpa_name")))
                 .genres(new TreeSet<>(jdbcTemplate.query("SELECT fg.film_id, fg.genre_id, g.name, g.id FROM films_genres fg " +
                                 "LEFT JOIN genres g ON fg.genre_id = g.id WHERE fg.film_id = ? ",
                         genreRowMapper(), rs.getInt("id"))))
-                .likes(jdbcTemplate.query("SELECT * FROM films_likes WHERE film_id = ?", (rs1, rowNum1) ->
-                        Integer.valueOf(rs1.getInt("user_id")), rs.getInt("id")))
+                .likes(rs.getInt("likes"))
                 .build();
     }
 
@@ -148,17 +127,5 @@ public class FilmDbStorage implements FilmStorage {
                 .id(rs.getInt("id"))
                 .name(rs.getString("name"))
                 .build();
-    }
-
-    public List<Integer> findAllGenresId() {
-        String sql = "SELECT id FROM genres";
-        List<Integer> ids = jdbcTemplate.query(sql, (rs, rowNum) -> Integer.valueOf(rs.getInt("id")));
-        return ids;
-    }
-
-    public List<Integer> findAllMpasId() {
-        String sql = "SELECT id FROM mpa";
-        List<Integer> ids = jdbcTemplate.query(sql, (rs, rowNum) -> Integer.valueOf(rs.getInt("id")));
-        return ids;
     }
 }

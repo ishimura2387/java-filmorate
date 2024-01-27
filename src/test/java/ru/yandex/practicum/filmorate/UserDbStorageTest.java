@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserDbStorage;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -65,6 +66,10 @@ class UserDbStorageTest {
                 .build();
         userStorage.createNewUser(user4);
         User user5 = userStorage.getUser(4);
+        List<Integer> newList = new ArrayList<>();
+        newList.add(1);
+        newList.add(2);
+        newList.add(4);
         assertEquals(user4, user5);
     }
 
