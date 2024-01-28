@@ -11,6 +11,7 @@ import ru.yandex.practicum.filmorate.storage.FriendStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.List;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -21,6 +22,7 @@ public class FriendService {
     @Autowired
     @Qualifier("userDbStorage")
     private final UserStorage userDbStorage;
+
     public void addFriends(int idUser1, int idUser2) {
         checkUser(idUser1);
         checkUser(idUser2);
@@ -47,6 +49,7 @@ public class FriendService {
         log.debug("Обработка запроса getFriends");
         return friendDbStorage.getFriends(id);
     }
+    
     private void checkUser(int id) {
         if (!userDbStorage.findAllUsersId().contains(id)) {
             log.debug("Пользователь не найден!");
