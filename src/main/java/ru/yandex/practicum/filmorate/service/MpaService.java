@@ -33,7 +33,7 @@ public class MpaService {
         return mpa;
     }
 
-    public void checkMpas(int id) {
+    private void checkMpas(int id) {
         if (!mpaDbStorage.findAllMpasId().contains(id)) {
             log.debug("mpa не найден!");
             throw new NullObjectException("mpa не найден!");

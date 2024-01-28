@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.FriendDbStorage;
 import ru.yandex.practicum.filmorate.storage.UserDbStorage;
 
 import java.time.LocalDate;
@@ -20,7 +21,8 @@ import static org.junit.Assert.*;
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 class UserDbStorageTest {
     private final JdbcTemplate jdbcTemplate;
-    UserDbStorage userStorage;
+    public UserDbStorage userStorage;
+    public FriendDbStorage friendStorage;
     User user1;
     User user2;
     User user3;
@@ -28,6 +30,7 @@ class UserDbStorageTest {
     @BeforeEach
     public void beforeEach() {
         userStorage = new UserDbStorage(jdbcTemplate);
+        friendStorage = new FriendDbStorage(jdbcTemplate);
         user1 = User.builder()
                 .email("user21@yandex.ru")
                 .login("user1")
@@ -121,22 +124,22 @@ class UserDbStorageTest {
 
     @Test
     public void testFriends() {
-        userStorage.addFriends(1, 2);
-        userStorage.addFriends(1, 3);
-        userStorage.addFriends(2, 3);
-        userStorage.addFriends(3, 1);
-        userStorage.addFriends(3, 2);
-        List<User> user1Friends = userStorage.getFriends(1);
-        List<User> user2Friends = userStorage.getFriends(2);
-        List<User> user3Friends = userStorage.getFriends(3);
+        friendStorage.addFriends(1, 2);
+        friendStorage.addFriends(1, 3);
+        friendStorage.addFriends(2, 3);
+        friendStorage.addFriends(3, 1);
+        friendStorage.addFriends(3, 2);
+        List<User> user1Friends = friendStorage.getFriends(1);
+        List<User> user2Friends = friendStorage.getFriends(2);
+        List<User> user3Friends = friendStorage.getFriends(3);
         assertTrue(user1Friends.contains(user2));
         assertTrue(user1Friends.contains(user3));
         assertTrue(user2Friends.contains(user3));
         assertFalse(user2Friends.contains(user1));
         assertTrue(user3Friends.contains(user2));
         assertTrue(user3Friends.contains(user1));
-        userStorage.deleteFriends(3, 1);
-        List<User> user3FriendsAfterDelete = userStorage.getFriends(3);
+        friendStorage.deleteFriends(3, 1);
+        List<User> user3FriendsAfterDelete = friendStorage.getFriends(3);
         assertTrue(user3FriendsAfterDelete.contains(user2));
         assertFalse(user3FriendsAfterDelete.contains(user1));
     }

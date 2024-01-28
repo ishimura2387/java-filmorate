@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.exception.NullObjectException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -58,43 +57,7 @@ public class UserService {
         return userDbStorage.getUser(id);
     }
 
-
-    public void addFriends(int idUser1, int idUser2) {
-        checkUser(idUser1);
-        checkUser(idUser2);
-        log.debug("Обработка запроса добавления в друзья");
-        userDbStorage.addFriends(idUser1, idUser2);
-    }
-
-    public void deleteFriends(int idUser1, int idUser2) {
-        checkUser(idUser1);
-        checkUser(idUser2);
-        log.debug("Обработка запроса удаления из друзей");
-        userDbStorage.deleteFriends(idUser1, idUser2);
-    }
-
-    public List<User> findTotalFriends(int idUser1, int idUser2) {
-        checkUser(idUser1);
-        checkUser(idUser2);
-        log.debug("Обработка запроса поиска общих друзей");
-        List<User> totalFriends = new ArrayList<>();
-        List<User> friendsUser1 = userDbStorage.getFriends(idUser1);
-        List<User> friendsUser2 = userDbStorage.getFriends(idUser2);
-        for (User user : friendsUser2) {
-            if (friendsUser1.contains(user)) {
-                totalFriends.add(user);
-            }
-        }
-        return totalFriends;
-    }
-
-    public List<User> getFriends(int id) {
-        checkUser(id);
-        log.debug("Обработка запроса getFriends");
-        return userDbStorage.getFriends(id);
-    }
-
-    public void checkUser(int id) {
+    private void checkUser(int id) {
         if (!userDbStorage.findAllUsersId().contains(id)) {
             log.debug("Пользователь не найден!");
             throw new NullObjectException("Пользователь не найден!");

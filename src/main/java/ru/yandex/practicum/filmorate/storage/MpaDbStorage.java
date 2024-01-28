@@ -33,5 +33,4 @@ public class MpaDbStorage implements MpaStorage {
         List<Integer> ids = jdbcTemplate.query(sql, (rs, rowNum) -> Integer.valueOf(rs.getInt("id")));
         return ids;
     }
-
 }

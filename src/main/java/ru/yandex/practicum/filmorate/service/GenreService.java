@@ -32,7 +32,7 @@ public class GenreService {
         return genreDbStorage.getGenre(id);
     }
 
-    public void checkGenre(int id) {
+    private void checkGenre(int id) {
         if (!genreDbStorage.findAllGenresId().contains(id)) {
             log.debug("жанр не найден!");
             throw new NullObjectException("жанр не найден!");

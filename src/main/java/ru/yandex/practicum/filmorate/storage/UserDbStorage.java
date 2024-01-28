@@ -62,23 +62,6 @@ public class UserDbStorage implements UserStorage {
         return ids;
     }
 
-    public List<User> getFriends(int id) {
-        String sql = "SELECT a.friend_id, b.id, b.email, b.login, b.name, b.birthday FROM friendship_status AS a " +
-                "LEFT OUTER JOIN users AS b ON a.friend_id = b.id WHERE user_id = ?";
-        List<User> friends = jdbcTemplate.query(sql, userRowMapper(), id);
-        return friends;
-    }
-
-    public void addFriends(int idUser, int idFriend) {
-        String sql = "INSERT INTO friendship_status (user_id, friend_id) VALUES (?, ?)";
-        jdbcTemplate.update(sql, idUser, idFriend);
-    }
-
-    public void deleteFriends(int idUser, int idFriend) {
-        String sql = "DELETE FROM friendship_status WHERE user_id = ? AND friend_id = ?";
-        jdbcTemplate.update(sql, idUser, idFriend);
-    }
-
     private RowMapper<User> userRowMapper() {
         return (rs, rowNum) -> User.builder()
                 .id(rs.getInt("id"))

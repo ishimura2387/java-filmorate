@@ -24,34 +24,11 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> findAllFilms() {
-        String sqlForGenres = "SELECT fg.film_id, fg.genre_id, g.name, g.id FROM films_genres fg LEFT JOIN genres g ON fg.genre_id = g.id";
+        List<Integer> idFilms = jdbcTemplate.query("SELECT film_id FROM films_genres fg", (rs, rowNum) ->
+                Integer.valueOf(rs.getInt("film_id")));
         String sql = "SELECT f.id film_id, f.name film_name, f.description, f.releasedate, f.duration, f.likes, m.id mpa_id, " +
                 "m.name mpa_name FROM films f LEFT JOIN mpa m ON f.mpa = m.id";
-        List<Integer> idFilms = jdbcTemplate.query(sqlForGenres, (RowMapper<Integer>) (rs, rowNum) ->
-                Integer.valueOf(rs.getInt("film_id")));
-        List<Genre> genres = jdbcTemplate.query(sqlForGenres, genreRowMapper());
-        HashMap<Integer, List<Genre>> filmsGenres = new HashMap<>();
-        if (idFilms.size() > 0) {
-            Integer newCount = idFilms.get(0);
-            Integer oldCount = idFilms.get(0);
-            Integer countList = 0;
-            List<Genre> listGenre = new ArrayList<>();
-            for (Integer id : idFilms) {
-                newCount = id;
-                if (newCount == oldCount) {
-                    listGenre.add(genres.get(countList));
-                    countList++;
-                    filmsGenres.put(id, new ArrayList<>(listGenre));
-                } else {
-                    listGenre.clear();
-                    listGenre.add(genres.get(countList));
-                    countList++;
-                    filmsGenres.put(id, new ArrayList<>(listGenre));
-                }
-                oldCount = newCount;
-            }
-        }
-        List<Film> films = jdbcTemplate.query(sql, filmRowMapper(filmsGenres));
+        List<Film> films = jdbcTemplate.query(sql, filmRowMapper(getGenres(idFilms)));
         return films;
     }
 
@@ -93,12 +70,9 @@ public class FilmDbStorage implements FilmStorage {
     public Film getFilm(int id) {
         String sql = "SELECT f.id film_id, f.name film_name, f.description, f.releasedate, f.duration, f.likes, m.id mpa_id, " +
                 "m.name mpa_name FROM films f LEFT JOIN mpa m ON f.mpa = m.id WHERE f.id = ?";
-        String sqlForGenres = "SELECT fg.film_id, fg.genre_id, g.name, g.id FROM films_genres fg LEFT JOIN genres g " +
-                "ON fg.genre_id = g.id WHERE fg.film_id = ?";
-        List<Genre> genres = jdbcTemplate.query(sqlForGenres, genreRowMapper(), id);
-        HashMap<Integer, List<Genre>> mapa = new HashMap<>();
-        mapa.put(id, genres);
-        Film film = jdbcTemplate.queryForObject(sql, filmRowMapper(mapa), id);
+        List<Integer> listForHGenres = jdbcTemplate.query("SELECT film_id FROM films_genres fg", (rs, rowNum) ->
+                Integer.valueOf(rs.getInt("film_id")));
+        Film film = jdbcTemplate.queryForObject(sql, filmRowMapper(getGenres(listForHGenres)), id);
         return film;
     }
 
@@ -119,26 +93,6 @@ public class FilmDbStorage implements FilmStorage {
         return ids;
     }
 
-    @Override
-    public void addLike(int userId, int filmId) {
-        String sql = "INSERT INTO films_likes (film_id, user_id) VALUES (?, ?)";
-        jdbcTemplate.update(sql, userId, filmId);
-        String sqlLikes = "UPDATE films SET likes = ? WHERE id = ?";
-        Integer countLikes = jdbcTemplate.queryForObject("SELECT likes FROM films WHERE id = ?", (rs, rowNum) ->
-                Integer.valueOf(rs.getInt("likes")), filmId) + 1;
-        jdbcTemplate.update(sqlLikes, countLikes, filmId);
-    }
-
-    @Override
-    public void deleteLike(int userId, int filmId) {
-        String sql = "DELETE FROM films_likes WHERE film_id = ? AND user_id = ?";
-        jdbcTemplate.update(sql, userId, filmId);
-        Integer countLikes = jdbcTemplate.queryForObject("SELECT likes FROM films WHERE id = ?", (rs, rowNum) ->
-                Integer.valueOf(rs.getInt("likes")), filmId) - 1;
-        String sqlLikes = "UPDATE films SET likes = ? WHERE id = ?";
-        jdbcTemplate.update(sqlLikes, countLikes, filmId);
-    }
-
     private RowMapper<Film> filmRowMapper(HashMap<Integer, List<Genre>> films_genres) {
         return (rs, rowNum) -> Film.builder()
                 .id(rs.getInt("film_id"))
@@ -157,5 +111,40 @@ public class FilmDbStorage implements FilmStorage {
                 .id(rs.getInt("id"))
                 .name(rs.getString("name"))
                 .build();
+    }
+
+    private HashMap<Integer, List<Genre>> getGenres(List<Integer> idFilms) {
+        HashMap<Integer, List<Genre>> filmsGenres = new HashMap<>();
+        if (idFilms.size() > 0) {
+            String countSizeList = new String();
+            for (Integer id : idFilms) {
+                countSizeList = countSizeList + "?, ";
+            }
+            countSizeList = countSizeList.substring(0, countSizeList.length() - 2) + ")";
+            String sqlForGenres = "SELECT fg.film_id, fg.genre_id, g.name, g.id FROM films_genres fg " +
+                    "LEFT JOIN genres g ON fg.genre_id = g.id WHERE fg.film_id IN (" + countSizeList;
+            List<Genre> genres = jdbcTemplate.query(sqlForGenres, genreRowMapper(), idFilms.toArray());
+            if (genres.size() > 0) {
+                Integer newCount = idFilms.get(0);
+                Integer oldCount = idFilms.get(0);
+                Integer countList = 0;
+                List<Genre> listGenre = new ArrayList<>();
+                for (Integer id : idFilms) {
+                    newCount = id;
+                    if (newCount == oldCount) {
+                        listGenre.add(genres.get(countList));
+                        countList++;
+                        filmsGenres.put(id, new ArrayList<>(listGenre));
+                    } else if (countList < genres.size()) {
+                        listGenre.clear();
+                        listGenre.add(genres.get(countList));
+                        countList++;
+                        filmsGenres.put(id, new ArrayList<>(listGenre));
+                    }
+                    oldCount = newCount;
+                }
+            }
+        }
+        return filmsGenres;
     }
 }

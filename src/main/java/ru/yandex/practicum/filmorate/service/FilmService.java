@@ -9,8 +9,6 @@ import ru.yandex.practicum.filmorate.exception.NullObjectException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -20,7 +18,6 @@ public class FilmService {
     @Autowired
     @Qualifier("filmDbStorage")
     private final FilmStorage filmDbStorage;
-    private final UserService userService;
 
     public List<Film> findAllFilms() {
         List<Film> films = filmDbStorage.findAllFilms();
@@ -51,36 +48,7 @@ public class FilmService {
         return filmDbStorage.getFilm(id);
     }
 
-
-    public void addLike(int idUser, int idFilm) {
-        checkFilm(idFilm);
-        userService.checkUser(idUser);
-        log.debug("Запрос добавления лайка");
-        filmDbStorage.addLike(idUser, idFilm);
-    }
-
-    public void deleteLike(int idUser, int idFilm) {
-        checkFilm(idFilm);
-        userService.checkUser(idUser);
-        log.debug("Запрос удаления лайка");
-        filmDbStorage.deleteLike(idUser, idFilm);
-    }
-
-    public List<Film> getPopularFilms(int id) {
-        log.debug("Запрос популярных фильмов");
-        List<Film> films = findAllFilms();
-        if (films.size() < id) {
-            id = films.size();
-        }
-        Collections.sort(films);
-        List<Film> popularFilms = new ArrayList<>();
-        for (int i = 0; i < id; i++) {
-            popularFilms.add(films.get(i));
-        }
-        return popularFilms;
-    }
-
-    public void checkFilm(int id) {
+    private void checkFilm(int id) {
         if (!filmDbStorage.findAllFilmsId().contains(id)) {
             log.debug("Фильм не найден!");
             throw new NullObjectException("Фильм не найден!");
