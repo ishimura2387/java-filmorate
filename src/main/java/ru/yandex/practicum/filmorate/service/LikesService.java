@@ -51,12 +51,14 @@ public class LikesService {
             throw new NullObjectException("Лайк отсутствует!");
         }
     }
+
     private void checkFilm(int id) {
         if (!filmDbStorage.findAllFilmsId().contains(id)) {
             log.debug("Фильм не найден!");
             throw new NullObjectException("Фильм не найден!");
         }
     }
+    
     private void checkUser(int id) {
         if (!userDbStorage.findAllUsersId().contains(id)) {
             log.debug("Пользователь не найден!");
