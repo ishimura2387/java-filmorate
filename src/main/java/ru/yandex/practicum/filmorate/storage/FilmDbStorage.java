@@ -10,6 +10,8 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.TreeSet;
 
@@ -22,9 +24,34 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> findAllFilms() {
+        String sqlForGenres = "SELECT fg.film_id, fg.genre_id, g.name, g.id FROM films_genres fg LEFT JOIN genres g ON fg.genre_id = g.id";
         String sql = "SELECT f.id film_id, f.name film_name, f.description, f.releasedate, f.duration, f.likes, m.id mpa_id, " +
                 "m.name mpa_name FROM films f LEFT JOIN mpa m ON f.mpa = m.id";
-        List<Film> films = jdbcTemplate.query(sql, filmRowMapper());
+        List<Integer> idFilms = jdbcTemplate.query(sqlForGenres, (RowMapper<Integer>) (rs, rowNum) ->
+                Integer.valueOf(rs.getInt("film_id")));
+        List<Genre> genres = jdbcTemplate.query(sqlForGenres, genreRowMapper());
+        HashMap<Integer, List<Genre>> films_genres = new HashMap<>();
+        if (idFilms.size() > 0) {
+            Integer newCount = idFilms.get(0);
+            Integer oldCount = idFilms.get(0);
+            Integer countList = 0;
+            List<Genre> listGenre = new ArrayList<>();
+            for (Integer id : idFilms) {
+                newCount = id;
+                if (newCount == oldCount) {
+                    listGenre.add(genres.get(countList));
+                    countList++;
+                    films_genres.put(id, new ArrayList<>(listGenre));
+                } else {
+                    listGenre.clear();
+                    listGenre.add(genres.get(countList));
+                    countList++;
+                    films_genres.put(id, new ArrayList<>(listGenre));
+                }
+                oldCount = newCount;
+            }
+        }
+        List<Film> films = jdbcTemplate.query(sql, filmRowMapper(films_genres));
         return films;
     }
 
@@ -66,7 +93,12 @@ public class FilmDbStorage implements FilmStorage {
     public Film getFilm(int id) {
         String sql = "SELECT f.id film_id, f.name film_name, f.description, f.releasedate, f.duration, f.likes, m.id mpa_id, " +
                 "m.name mpa_name FROM films f LEFT JOIN mpa m ON f.mpa = m.id WHERE f.id = ?";
-        Film film = jdbcTemplate.queryForObject(sql, filmRowMapper(), id);
+        String sqlForGenres = "SELECT fg.film_id, fg.genre_id, g.name, g.id FROM films_genres fg LEFT JOIN genres g " +
+                "ON fg.genre_id = g.id WHERE fg.film_id = ?";
+        List<Genre> genres = jdbcTemplate.query(sqlForGenres, genreRowMapper(), id);
+        HashMap<Integer, List<Genre>> mapa = new HashMap<>();
+        mapa.put(id, genres);
+        Film film = jdbcTemplate.queryForObject(sql, filmRowMapper(mapa), id);
         return film;
     }
 
@@ -107,7 +139,7 @@ public class FilmDbStorage implements FilmStorage {
         jdbcTemplate.update(sqlLikes, countLikes, filmId);
     }
 
-    private RowMapper<Film> filmRowMapper() {
+    private RowMapper<Film> filmRowMapper(HashMap<Integer, List<Genre>> films_genres) {
         return (rs, rowNum) -> Film.builder()
                 .id(rs.getInt("film_id"))
                 .name(rs.getString("film_name"))
@@ -115,9 +147,7 @@ public class FilmDbStorage implements FilmStorage {
                 .releaseDate(rs.getDate("releasedate").toLocalDate())
                 .duration(rs.getInt("duration"))
                 .mpa(new Mpa(rs.getInt("mpa_id"), rs.getString("mpa_name")))
-                .genres(new TreeSet<>(jdbcTemplate.query("SELECT fg.film_id, fg.genre_id, g.name, g.id FROM films_genres fg " +
-                                "LEFT JOIN genres g ON fg.genre_id = g.id WHERE fg.film_id = ? ",
-                        genreRowMapper(), rs.getInt("id"))))
+                .genres(new TreeSet<>(films_genres.getOrDefault(rs.getInt("film_id"), new ArrayList<>())))
                 .likes(rs.getInt("likes"))
                 .build();
     }
