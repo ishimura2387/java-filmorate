@@ -39,6 +39,4 @@ public class MpaService {
             throw new NullObjectException("mpa не найден!");
         }
     }
-
-
 }
