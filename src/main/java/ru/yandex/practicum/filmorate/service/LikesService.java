@@ -58,10 +58,10 @@ public class LikesService {
             throw new NullObjectException("Фильм не найден!");
         }
     }
-    
+
     private void checkUser(int id) {
         if (!userDbStorage.findAllUsersId().contains(id)) {
-            log.debug("Пользователь не найден!");
+            log.debug("Пользователь не найден!!");
             throw new NullObjectException("Пользователь не найден!");
         }
     }
