@@ -49,10 +49,10 @@ public class FriendService {
         log.debug("Обработка запроса getFriends");
         return friendDbStorage.getFriends(id);
     }
-    
+
     private void checkUser(int id) {
         if (!userDbStorage.findAllUsersId().contains(id)) {
-            log.debug("Пользователь не найден!");
+            log.debug("Пользователь не найден!!");
             throw new NullObjectException("Пользователь не найден!");
         }
     }
