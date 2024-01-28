@@ -30,7 +30,7 @@ public class FilmDbStorage implements FilmStorage {
         List<Integer> idFilms = jdbcTemplate.query(sqlForGenres, (RowMapper<Integer>) (rs, rowNum) ->
                 Integer.valueOf(rs.getInt("film_id")));
         List<Genre> genres = jdbcTemplate.query(sqlForGenres, genreRowMapper());
-        HashMap<Integer, List<Genre>> films_genres = new HashMap<>();
+        HashMap<Integer, List<Genre>> filmsGenres = new HashMap<>();
         if (idFilms.size() > 0) {
             Integer newCount = idFilms.get(0);
             Integer oldCount = idFilms.get(0);
@@ -41,17 +41,17 @@ public class FilmDbStorage implements FilmStorage {
                 if (newCount == oldCount) {
                     listGenre.add(genres.get(countList));
                     countList++;
-                    films_genres.put(id, new ArrayList<>(listGenre));
+                    filmsGenres.put(id, new ArrayList<>(listGenre));
                 } else {
                     listGenre.clear();
                     listGenre.add(genres.get(countList));
                     countList++;
-                    films_genres.put(id, new ArrayList<>(listGenre));
+                    filmsGenres.put(id, new ArrayList<>(listGenre));
                 }
                 oldCount = newCount;
             }
         }
-        List<Film> films = jdbcTemplate.query(sql, filmRowMapper(films_genres));
+        List<Film> films = jdbcTemplate.query(sql, filmRowMapper(filmsGenres));
         return films;
     }
 
