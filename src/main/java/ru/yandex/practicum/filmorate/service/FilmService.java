@@ -1,70 +1,57 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NullObjectException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import org.springframework.stereotype.Service;
-import lombok.RequiredArgsConstructor;
 
-import java.util.*;
-
-import lombok.extern.slf4j.Slf4j;
-import ru.yandex.practicum.filmorate.storage.UserStorage;
+import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class FilmService {
-
-    private final FilmStorage inMemoryFilmStorage;
-    private final UserStorage inMemoryUserStorage;
+    @Autowired
+    @Qualifier("filmDbStorage")
+    private final FilmStorage filmDbStorage;
 
     public List<Film> findAllFilms() {
-        return inMemoryFilmStorage.findAllFilms();
-    }
-
-    public List<Integer> findAllFilmsId() {
-        return inMemoryFilmStorage.findAllFilmsId();
+        List<Film> films = filmDbStorage.findAllFilms();
+        log.debug("Обработка запроса GET /films; Текущее количество фильмов: {}", films.size());
+        return films;
     }
 
     public Film createFilm(Film film) {
-        return inMemoryFilmStorage.createNewFilm(film);
+        log.debug("Создан фильм: {}", film);
+        return filmDbStorage.createNewFilm(film);
     }
 
     public Film updateFilm(Film film) {
-        return inMemoryFilmStorage.updateFilm(film);
+        checkFilm(film.getId());
+        log.debug("Изменен фильм: {}", film);
+        return filmDbStorage.updateFilm(film);
     }
 
     public void deleteFilm(int id) {
-        inMemoryFilmStorage.deleteFilm(id);
+        checkFilm(id);
+        log.debug("Удален фильм c id: {}", id);
+        filmDbStorage.deleteFilm(id);
     }
 
     public Film getFilm(int id) {
-        return inMemoryFilmStorage.getFilm(id);
+        checkFilm(id);
+        log.debug("Запрошен фильм c id: {}", id);
+        return filmDbStorage.getFilm(id);
     }
 
-
-    public void addLike(int idUser, int idFilm) {
-        getFilm(idFilm).getLikes().add(idUser);
-    }
-
-    public void deleteLike(int idUser, int idFilm) {
-        getFilm(idFilm).getLikes().remove(Integer.valueOf(idUser));
-    }
-
-    public List<Film> getPopularFilms(int id) {
-        List<Film> films = findAllFilms();
-        if (films.size() < id) {
-            id = films.size();
+    private void checkFilm(int id) {
+        if (!filmDbStorage.findAllFilmsId().contains(id)) {
+            log.debug("Фильм не найден!");
+            throw new NullObjectException("Фильм не найден!");
         }
-        Collections.sort(films);
-        List<Film> popularFilms = new ArrayList<>();
-        for (int i = 0; i < id; i++) {
-            popularFilms.add(films.get(i));
-        }
-        return popularFilms;
-    }
-
-    public boolean findFilm(int id) {
-        return findAllFilmsId().contains(id);
     }
 }

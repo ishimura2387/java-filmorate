@@ -2,84 +2,65 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.RequestBody;
-import ru.yandex.practicum.filmorate.model.User;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-
-
-import java.util.ArrayList;
-import java.util.List;
-
+import org.springframework.web.bind.annotation.RequestBody;
+import ru.yandex.practicum.filmorate.exception.NullObjectException;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
+
+import java.util.List;
 
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class UserService {
-
-    private final UserStorage inMemoryUserStorage;
+    @Autowired
+    @Qualifier("userDbStorage")
+    private final UserStorage userDbStorage;
 
     public List<User> findAllUsers() {
-        return inMemoryUserStorage.findAllUsers();
-    }
-
-    public List<Integer> findAllUsersId() {
-        return inMemoryUserStorage.findAllUsersId();
+        List<User> users = userDbStorage.findAllUsers();
+        log.debug("Обработка запроса GET /users; Текущее количество пользователей: {}",
+                users.size());
+        return users;
     }
 
     public User createUser(User user) {
-        return inMemoryUserStorage.createNewUser(user);
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
+        log.debug("Создан пользователь: {}", user);
+        return userDbStorage.createNewUser(user);
     }
 
     public User updateUser(@RequestBody User user) {
-        return inMemoryUserStorage.updateUser(user);
+        checkUser(user.getId());
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
+        log.debug("Пользователь изменен: {}", user);
+        return userDbStorage.updateUser(user);
     }
 
-    public User deleteUser(@RequestBody User user) {
-        inMemoryUserStorage.deleteUser(user.getId());
-        return user;
+    public void deleteUser(@RequestBody User user) {
+        checkUser(user.getId());
+        log.debug("Пользователь удален: {}", user);
+        userDbStorage.deleteUser(user.getId());
     }
 
     public User getUser(int id) {
-        return inMemoryUserStorage.getUser(id);
+        checkUser(id);
+        log.debug("Запрошен  c id: {}", id);
+        return userDbStorage.getUser(id);
     }
 
-
-    public void addFriends(int idUser1, int idUser2) {
-        getUser(idUser1).getFriends().add(idUser2);
-        getUser(idUser2).getFriends().add(idUser1);
-    }
-
-    public void deleteFriends(int idUser1, int idUser2) {
-        getUser(idUser1).getFriends().remove(Integer.valueOf(idUser2));
-        getUser(idUser2).getFriends().remove(Integer.valueOf(idUser1));
-    }
-
-    public List<User> findTotalFriends(int idUser1, int idUser2) {
-        List<User> totalFriends = new ArrayList<>();
-        User user1 = getUser(idUser1);
-        List<Integer> friendsUser1 = user1.getFriends();
-        User user2 = getUser(idUser2);
-        List<Integer> friendsUser2 = user2.getFriends();
-        for (Integer id : friendsUser2) {
-            if (friendsUser1.contains(id)) {
-                totalFriends.add(getUser(id));
-            }
+    private void checkUser(int id) {
+        if (!userDbStorage.findAllUsersId().contains(id)) {
+            log.debug("Пользователь не найден!");
+            throw new NullObjectException("Пользователь не найден!");
         }
-        return totalFriends;
-    }
-
-    public List<User> getFriends(int id) {
-        List<Integer> listIdFriends = getUser(id).getFriends();
-        List<User> listUser = new ArrayList<>();
-        for (Integer idUser : listIdFriends) {
-            listUser.add(getUser(idUser));
-        }
-        return listUser;
-    }
-
-    public boolean finduser(int id) {
-        return findAllUsersId().contains(id);
     }
 }
